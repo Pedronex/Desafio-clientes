@@ -1,0 +1,24 @@
+CREATE TABLE IF NOT EXISTS Usuario (
+    id UUID PRIMARY KEY,
+    login VARCHAR UNIQUE NOT NULL,
+    senha VARCHAR NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Cliente (
+    id UUID PRIMARY KEY,
+    dataCadastro DATETIME DEFAULT NOW() NOT NULL,
+    dataAtualizacao DATETIME ON UPDATE NOW(),
+    telefone VARCHAR
+);
+
+CREATE TABLE IF NOT EXISTS Fisica (
+    cpf VARCHAR NOT NULL PRIMARY KEY,
+    nome VARCHAR NOT NULL,
+    dataNascimento DATE
+);
+
+CREATE TABLE IF NOT EXISTS Juridica (
+    cnpj VARCHAR PRIMARY KEY,
+    razaoSocial VARCHAR NOT NULL,
+    nomeFantasia VARCHAR
+);
