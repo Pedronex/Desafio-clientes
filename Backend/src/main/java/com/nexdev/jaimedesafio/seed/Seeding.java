@@ -9,7 +9,6 @@ import com.nexdev.jaimedesafio.entity.Juridica;
 import com.nexdev.jaimedesafio.entity.Usuario;
 import com.nexdev.jaimedesafio.service.UsuarioService;
 import com.nexdev.jaimedesafio.util.Encrypt;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
@@ -19,17 +18,24 @@ import java.util.Date;
 @Controller
 public class Seeding implements Seed {
 
-    @Autowired
+    final
     FisicaRepository fisicaRepository;
 
-    @Autowired
+    final
     JuridicaRepository juridicaRepository;
 
-    @Autowired
+    final
     ClienteRepository clienteRepository;
 
-    @Autowired
+    final
     UsuarioService usuarioService;
+
+    public Seeding(FisicaRepository fisicaRepository, JuridicaRepository juridicaRepository, ClienteRepository clienteRepository, UsuarioService usuarioService) {
+        this.fisicaRepository = fisicaRepository;
+        this.juridicaRepository = juridicaRepository;
+        this.clienteRepository = clienteRepository;
+        this.usuarioService = usuarioService;
+    }
 
     @Override
     @EventListener
@@ -70,7 +76,6 @@ public class Seeding implements Seed {
         cliente2.setTelefone("62 92222-1111");
         cliente2.setJuridica(pessoaJuridica);
 
-        System.out.println(usuario);
         cliente.setUsuario(usuario);
         cliente2.setUsuario(usuario);
         clienteRepository.save(cliente);

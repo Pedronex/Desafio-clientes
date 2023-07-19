@@ -5,14 +5,13 @@ import com.nexdev.jaimedesafio.Repository.FisicaRepository;
 import com.nexdev.jaimedesafio.Repository.JuridicaRepository;
 import com.nexdev.jaimedesafio.Repository.UsuarioRepository;
 import com.nexdev.jaimedesafio.dto.request.FisicaDto;
+import com.nexdev.jaimedesafio.dto.request.JuridicaDto;
 import com.nexdev.jaimedesafio.util.Objects;
 import com.nexdev.jaimedesafio.dto.request.ClienteDto;
 import com.nexdev.jaimedesafio.entity.Cliente;
 import com.nexdev.jaimedesafio.entity.Fisica;
 import com.nexdev.jaimedesafio.entity.Juridica;
 import com.nexdev.jaimedesafio.entity.Usuario;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,22 +19,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClienteService {
 
-    @Autowired
-    private ClienteRepository clienteRepository;
+    private final ClienteRepository clienteRepository;
 
-    @Autowired
-    private FisicaRepository fisicaRepository;
+    private final FisicaRepository fisicaRepository;
 
-    @Autowired
-    private JuridicaRepository juridicaRepository;
+    private final JuridicaRepository juridicaRepository;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public ResponseEntity createCliente(ClienteDto clienteDto){
-        System.out.println(clienteDto.getUserID());
+    public ClienteService(ClienteRepository clienteRepository, FisicaRepository fisicaRepository, JuridicaRepository juridicaRepository, UsuarioRepository usuarioRepository) {
+        this.clienteRepository = clienteRepository;
+        this.fisicaRepository = fisicaRepository;
+        this.juridicaRepository = juridicaRepository;
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    public ResponseEntity<String> createCliente(ClienteDto clienteDto){
         try{
-            System.out.println(clienteDto);
             if(usuarioRepository.findById(clienteDto.getUserID()).isPresent()){
                 Usuario usuario = usuarioRepository.findById(clienteDto.getUserID()).get();
                 Cliente cliente = new Cliente();
@@ -49,37 +49,33 @@ public class ClienteService {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não localizado!");
             }
         }catch (Exception e) {
-            System.err.println(e);
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ih deu erro");
         }
     }
 
-    public ResponseEntity updateCliente(ClienteDto clienteDto, String id) {
+    public ResponseEntity<String> updateCliente(ClienteDto clienteDto, String id) {
         try{
-            System.out.println(clienteDto);
-            System.out.println(id);
-
             if (usuarioRepository.findById(clienteDto.getUserID()).isPresent()){
                 if(clienteRepository.findById(id).isPresent()){
                     Usuario usuario = usuarioRepository.findById(clienteDto.getUserID()).get();
                     Cliente cliente = clienteRepository.findById(id).get();
                     cliente.setTelefone(clienteDto.getTelefone());
                     new Objects().merge(cliente, clienteDto);
-                    System.out.println(cliente);
                     createPerson(clienteDto, cliente);
                     cliente.setUsuario(usuario);
                     cliente.setId(id);
                     clienteRepository.save(cliente);
-                    return ResponseEntity.status(HttpStatus.OK).body("Cliente atualizado");
+                    return ResponseEntity.status(HttpStatus.OK).body("Cliente Atualizado");
                 }else{
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cliente não existe");
                 }
 
             }else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario não existe");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não existe");
             }
         }catch (Exception e) {
-            System.err.println(e);
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no server");
         }
     }
@@ -90,7 +86,6 @@ public class ClienteService {
             if(cliente.getFisica() != null){
                 fisica = cliente.getFisica();
                 new Objects().merge(fisica, clienteDto.getFisicaCliente());
-                System.out.println(fisica);
             }else{
                 fisica = new Fisica();
                 FisicaDto fisicaDto = clienteDto.getFisicaCliente();
@@ -98,8 +93,6 @@ public class ClienteService {
                 fisica.setNome(fisicaDto.getNome());
                 fisica.setCpf(fisicaDto.getCpf());
                 fisica.setDataNascimento(fisicaDto.getNascimento());
-
-                System.out.println("dados: " + fisica);
             }
             cliente.setFisica(fisica);
 
@@ -107,10 +100,20 @@ public class ClienteService {
 
         }
         if (clienteDto.getJuridicaCliente() != null){
-            Juridica juridica = new Juridica();
-            new Objects().merge(juridica, clienteDto.getJuridicaCliente());
-            System.out.println(juridica);
+            Juridica juridica;
+            if(cliente.getJuridica() != null){
+                juridica = cliente.getJuridica();
+                new Objects().merge(juridica, clienteDto.getJuridicaCliente());
+            }else{
+                juridica = new Juridica();
+                JuridicaDto juridicaDto = clienteDto.getJuridicaCliente();
+
+                juridica.setNomeFantasia(juridicaDto.getFantasia());
+                juridica.setCnpj(juridicaDto.getCnpj());
+                juridica.setRazaoSocial(juridicaDto.getRazao());
+            }
             cliente.setJuridica(juridica);
+
             juridicaRepository.save(juridica);
         }
     }
