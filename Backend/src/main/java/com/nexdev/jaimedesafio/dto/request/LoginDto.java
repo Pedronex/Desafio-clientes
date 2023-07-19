@@ -3,13 +3,13 @@ package com.nexdev.jaimedesafio.dto.request;
 public class LoginDto {
 
     private String login;
-    private String senha;
+    private String password;
 
     @Override
     public String toString() {
         return "LoginDto{" +
                 "login='" + login + '\'' +
-                ", senha='" + senha + '\'' +
+                ", senha='" + password + '\'' +
                 '}';
     }
 
@@ -18,8 +18,8 @@ public class LoginDto {
     }
 
 
-    public String getSenha() {
-        return senha;
+    public String getPassword() {
+        return password;
     }
 
 }

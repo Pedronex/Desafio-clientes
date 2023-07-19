@@ -1,6 +1,6 @@
 package com.nexdev.jaimedesafio.dto.respose;
 
-public class ClienteDto {
+public class ConsumerDto {
     private String id;
 
     public String getId() {

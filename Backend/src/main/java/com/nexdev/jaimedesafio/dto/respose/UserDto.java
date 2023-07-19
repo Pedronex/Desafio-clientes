@@ -1,9 +1,9 @@
 package com.nexdev.jaimedesafio.dto.respose;
 
-public class UsuarioDto {
-    public String id;
+public class UserDto {
+    public final String id;
 
-    public UsuarioDto(String id) {
+    public UserDto(String id) {
         this.id = id;
     }
 

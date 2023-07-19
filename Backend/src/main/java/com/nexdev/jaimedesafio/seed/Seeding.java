@@ -1,13 +1,13 @@
 package com.nexdev.jaimedesafio.seed;
 
-import com.nexdev.jaimedesafio.Repository.ClienteRepository;
-import com.nexdev.jaimedesafio.Repository.FisicaRepository;
-import com.nexdev.jaimedesafio.Repository.JuridicaRepository;
-import com.nexdev.jaimedesafio.entity.Cliente;
-import com.nexdev.jaimedesafio.entity.Fisica;
-import com.nexdev.jaimedesafio.entity.Juridica;
-import com.nexdev.jaimedesafio.entity.Usuario;
-import com.nexdev.jaimedesafio.service.UsuarioService;
+import com.nexdev.jaimedesafio.repository.ConsumerRepository;
+import com.nexdev.jaimedesafio.repository.IndividualRepository;
+import com.nexdev.jaimedesafio.repository.LegalRepository;
+import com.nexdev.jaimedesafio.entity.Consumer;
+import com.nexdev.jaimedesafio.entity.Individual;
+import com.nexdev.jaimedesafio.entity.Legal;
+import com.nexdev.jaimedesafio.entity.User;
+import com.nexdev.jaimedesafio.service.UserService;
 import com.nexdev.jaimedesafio.util.Encrypt;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -19,22 +19,22 @@ import java.util.Date;
 public class Seeding implements Seed {
 
     final
-    FisicaRepository fisicaRepository;
+    IndividualRepository individualRepository;
 
     final
-    JuridicaRepository juridicaRepository;
+    LegalRepository legalRepository;
 
     final
-    ClienteRepository clienteRepository;
+    ConsumerRepository consumerRepository;
 
     final
-    UsuarioService usuarioService;
+    UserService userService;
 
-    public Seeding(FisicaRepository fisicaRepository, JuridicaRepository juridicaRepository, ClienteRepository clienteRepository, UsuarioService usuarioService) {
-        this.fisicaRepository = fisicaRepository;
-        this.juridicaRepository = juridicaRepository;
-        this.clienteRepository = clienteRepository;
-        this.usuarioService = usuarioService;
+    public Seeding(IndividualRepository individualRepository, LegalRepository legalRepository, ConsumerRepository consumerRepository, UserService userService) {
+        this.individualRepository = individualRepository;
+        this.legalRepository = legalRepository;
+        this.consumerRepository = consumerRepository;
+        this.userService = userService;
     }
 
     @Override
@@ -49,36 +49,36 @@ public class Seeding implements Seed {
 
     @Override
     public void create() throws Exception {
-        Usuario usuario = new Usuario();
+        User user = new User();
 
-        usuario.setLogin("pedro.silva");
-        usuario.setSenha(Encrypt.encrypt("master"));
-        usuarioService.CreateOrUpdateUsuario(usuario);
+        user.setLogin("pedro.silva");
+        user.setPassword(Encrypt.encrypt("master"));
+        userService.CreateOrUpdateUser(user);
 
-        Fisica pessoaFisica = new Fisica();
-        Juridica pessoaJuridica = new Juridica();
+        Individual pessoaIndividual = new Individual();
+        Legal pessoaLegal = new Legal();
 
-        pessoaFisica.setCpf("111.111.111-11");
-        pessoaFisica.setNome("Lacerda");
-        pessoaFisica.setDataNascimento(new Date());
-        fisicaRepository.save(pessoaFisica);
+        pessoaIndividual.setIr("111.111.111-11");
+        pessoaIndividual.setName("Lacerda");
+        pessoaIndividual.setBirthday(new Date());
+        individualRepository.save(pessoaIndividual);
 
-        pessoaJuridica.setRazaoSocial("NEXDEV LTDA");
-        pessoaJuridica.setCnpj("44.955.411/0001-06");
-        pessoaJuridica.setNomeFantasia("Pedro Soares Silva");
-        juridicaRepository.save(pessoaJuridica);
+        pessoaLegal.setCorporateName("NEXDEV LTDA");
+        pessoaLegal.setCnpj("44.955.411/0001-06");
+        pessoaLegal.setTrade("Pedro Soares Silva");
+        legalRepository.save(pessoaLegal);
 
-        Cliente cliente = new Cliente();
-        cliente.setTelefone("62 91111-1111");
-        cliente.setFisica(pessoaFisica);
+        Consumer consumer = new Consumer();
+        consumer.setPhone("62 91111-1111");
+        consumer.setIndividual(pessoaIndividual);
 
-        Cliente cliente2 = new Cliente();
-        cliente2.setTelefone("62 92222-1111");
-        cliente2.setJuridica(pessoaJuridica);
+        Consumer consumer2 = new Consumer();
+        consumer2.setPhone("62 92222-1111");
+        consumer2.setLegal(pessoaLegal);
 
-        cliente.setUsuario(usuario);
-        cliente2.setUsuario(usuario);
-        clienteRepository.save(cliente);
-        clienteRepository.save(cliente2);
+        consumer.setUser(user);
+        consumer2.setUser(user);
+        consumerRepository.save(consumer);
+        consumerRepository.save(consumer2);
     }
 }

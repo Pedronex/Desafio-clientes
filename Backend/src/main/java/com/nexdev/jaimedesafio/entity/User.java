@@ -8,20 +8,22 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicInsert
 @DynamicUpdate
 @Table(name = "Usuario")
-public class Usuario {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String login;
-    private String senha;
+
+    @Column(name = "senha")
+    private String password;
 
     @Override
     public String toString() {
-        return "Usuario{" +
+        return "User{" +
                 "id='" + id + '\'' +
                 ", login='" + login + '\'' +
-                ", senha='" + senha + '\'' +
+                ", password='" + password + '\'' +
                 '}';
     }
 
@@ -29,19 +31,15 @@ public class Usuario {
         return id;
     }
 
-    public String getLogin() {
-        return login;
-    }
-
     public void setLogin(String login) {
         this.login = login;
     }
 
-    public String getSenha() {
-        return senha;
+    public String getPassword() {
+        return password;
     }
 
-    public void setSenha(String senha) {
-        this.senha = senha;
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
