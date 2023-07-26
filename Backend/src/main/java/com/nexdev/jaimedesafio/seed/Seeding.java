@@ -7,15 +7,18 @@ import com.nexdev.jaimedesafio.entity.Consumer;
 import com.nexdev.jaimedesafio.entity.Individual;
 import com.nexdev.jaimedesafio.entity.Legal;
 import com.nexdev.jaimedesafio.entity.User;
+import com.nexdev.jaimedesafio.security.Role;
 import com.nexdev.jaimedesafio.service.UserService;
-import com.nexdev.jaimedesafio.util.Encrypt;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 
 import java.util.Date;
 
 @Controller
+@RequiredArgsConstructor
 public class Seeding implements Seed {
 
     final
@@ -30,12 +33,7 @@ public class Seeding implements Seed {
     final
     UserService userService;
 
-    public Seeding(IndividualRepository individualRepository, LegalRepository legalRepository, ConsumerRepository consumerRepository, UserService userService) {
-        this.individualRepository = individualRepository;
-        this.legalRepository = legalRepository;
-        this.consumerRepository = consumerRepository;
-        this.userService = userService;
-    }
+    final PasswordEncoder encoder;
 
     @Override
     @EventListener
@@ -48,12 +46,13 @@ public class Seeding implements Seed {
     }
 
     @Override
-    public void create() throws Exception {
-        User user = new User();
-
-        user.setLogin("pedro.silva");
-        user.setPassword(Encrypt.encrypt("master"));
-        userService.CreateOrUpdateUser(user);
+    public void create() {
+        User user = User.builder()
+                .login("pedro.silva")
+                .pass(encoder.encode("master"))
+                .role(Role.USER)
+                .build();
+        userService.createOrUpdateUser(user);
 
         Individual pessoaIndividual = new Individual();
         Legal pessoaLegal = new Legal();

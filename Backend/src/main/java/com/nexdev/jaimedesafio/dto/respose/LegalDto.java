@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConsumerDto {
-    private String id;
-    private String phone;
-    private IndividualDto individualConsumer;
-    private LegalDto legalConsumer;
-    private String userID;
+public class LegalDto {
+    private String cnpj;
+    private String corporateName;
+    private String trade;
 }

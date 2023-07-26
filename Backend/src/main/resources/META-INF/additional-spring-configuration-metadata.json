@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "secret.pass",
+      "type": "java.lang.String",
+      "description": "Secret password for token"
+  }
+] }

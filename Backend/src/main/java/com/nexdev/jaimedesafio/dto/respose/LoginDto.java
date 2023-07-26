@@ -1,5 +1,6 @@
 package com.nexdev.jaimedesafio.dto.respose;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,10 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ConsumerDto {
-    private String id;
-    private String phone;
-    private IndividualDto individualConsumer;
-    private LegalDto legalConsumer;
-    private String userID;
+public class LoginDto {
+    public String token;
+    public String message;
 }

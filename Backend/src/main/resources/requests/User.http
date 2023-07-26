@@ -1,0 +1,18 @@
+### Create User / Criar usuário
+POST http://localhost:5000/user
+Content-Type: application/json
+
+{
+  "login": "user",
+  "password": "default"
+}
+
+### Login default user / Logando com o usuário padrão
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+  "login": "pedro.silva",
+  "password": "master"
+}
+

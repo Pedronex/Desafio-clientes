@@ -1,6 +1,10 @@
 package com.nexdev.jaimedesafio.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
@@ -8,6 +12,10 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "Cliente")
 public class Consumer {
@@ -37,33 +45,5 @@ public class Consumer {
 
     @ManyToOne
     private User user;
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Legal getLegal() {
-        return legal;
-    }
-
-    public void setLegal(Legal legal) {
-        this.legal = legal;
-    }
-
-    public Individual getIndividual() {
-        return individual;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public void setIndividual(Individual individual) {
-        this.individual = individual;
-    }
 
 }

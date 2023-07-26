@@ -1,120 +1,131 @@
 package com.nexdev.jaimedesafio.service;
 
-import com.nexdev.jaimedesafio.repository.ConsumerRepository;
-import com.nexdev.jaimedesafio.repository.IndividualRepository;
-import com.nexdev.jaimedesafio.repository.LegalRepository;
-import com.nexdev.jaimedesafio.repository.UserRepository;
+import com.nexdev.jaimedesafio.dto.request.FormConsumerDto;
 import com.nexdev.jaimedesafio.dto.request.IndividualDto;
 import com.nexdev.jaimedesafio.dto.request.LegalDto;
 import com.nexdev.jaimedesafio.entity.Consumer;
 import com.nexdev.jaimedesafio.entity.Individual;
 import com.nexdev.jaimedesafio.entity.Legal;
-import com.nexdev.jaimedesafio.util.Objects;
-import com.nexdev.jaimedesafio.dto.request.ConsumerDto;
 import com.nexdev.jaimedesafio.entity.User;
+import com.nexdev.jaimedesafio.provider.TokenProvider;
+import com.nexdev.jaimedesafio.repository.ConsumerRepository;
+import com.nexdev.jaimedesafio.repository.IndividualRepository;
+import com.nexdev.jaimedesafio.repository.LegalRepository;
+import com.nexdev.jaimedesafio.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.List;
+
 @Service
+@RequiredArgsConstructor
 public class ConsumerService {
 
     private final ConsumerRepository consumerRepository;
-
     private final IndividualRepository individualRepository;
-
     private final LegalRepository legalRepository;
-
     private final UserRepository userRepository;
+    private final TokenProvider provider;
 
-    public ConsumerService(ConsumerRepository consumerRepository, IndividualRepository individualRepository, LegalRepository legalRepository, UserRepository userRepository) {
-        this.consumerRepository = consumerRepository;
-        this.individualRepository = individualRepository;
-        this.legalRepository = legalRepository;
-        this.userRepository = userRepository;
-    }
+    // Método para criar um consumidor (cliente) com base nos dados fornecidos no formulário (FormConsumerDto)
+    public ResponseEntity<String> createConsumer(FormConsumerDto formConsumerDto, String token) {
+        String result = provider.verifyToken(token.split(" ")[1]);
+        try {
+            if (userRepository.findByLogin(result).isPresent()) {
+                User user = userRepository.findByLogin(result).get();
 
-    public ResponseEntity<String> createConsumer(ConsumerDto consumerDto){
-        try{
-            if(userRepository.findById(consumerDto.getUserID()).isPresent()){
-                User user = userRepository.findById(consumerDto.getUserID()).get();
-                Consumer consumer = new Consumer();
-                consumer.setPhone(consumerDto.getPhone());
-                createPerson(consumerDto, consumer);
-                consumer.setUser(user);
+                Consumer consumer = Consumer.builder()
+                        .phone(formConsumerDto.getPhone())
+                        .user(user)
+                        .build();
+
+                // Criar ou atualizar os dados do Consumidor Individual ou Jurídico com base no formulário
+                createPerson(formConsumerDto, consumer);
                 consumerRepository.save(consumer);
-                return ResponseEntity.status(HttpStatus.CREATED).body("Cliente Cadastrado!");
 
-            }else{
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não localizado!");
+                // Retornar uma resposta com código de status CREATED (201) e uma mensagem indicando que o cliente foi cadastrado
+                return ResponseEntity.status(HttpStatus.CREATED).body("Cliente Cadastrado!");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não localizado");
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            // Se ocorrer um erro durante a criação do consumidor, retornar uma resposta com código de status BAD REQUEST (400) e uma mensagem de erro
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Não foi possível determinar o erro");
         }
     }
 
-    public ResponseEntity<String> updateConsumer(ConsumerDto consumerDto, String id) {
-        try{
-            if (userRepository.findById(consumerDto.getUserID()).isPresent()){
-                if(consumerRepository.findById(id).isPresent()){
-                    User user = userRepository.findById(consumerDto.getUserID()).get();
+    // Método para atualizar um consumidor (cliente) existente com base nos dados fornecidos no formulário (FormConsumerDto) e no ID do consumidor
+    public ResponseEntity<String> updateConsumer(FormConsumerDto formConsumerDto, String id, String token) {
+        String result = provider.verifyToken(token.split(" ")[1]);
+        try {
+           if (userRepository.findByLogin(result).isPresent()) {
+               if (consumerRepository.findById(id).isPresent()) {
+                    User user = userRepository.findByLogin(result).get();
                     Consumer consumer = consumerRepository.findById(id).get();
-                    consumer.setPhone(consumerDto.getPhone());
-                    new Objects().merge(consumer, consumerDto);
-                    createPerson(consumerDto, consumer);
-                    consumer.setUser(user);
                     consumer.setId(id);
+                    consumer.setUser(user);
+
+                    consumer.setPhone(formConsumerDto.getPhone());
+
+                    createPerson(formConsumerDto, consumer);
                     consumerRepository.save(consumer);
+
                     return ResponseEntity.status(HttpStatus.OK).body("Consumer Atualizado");
-                }else{
+                } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Consumer não existe");
                 }
-
-            }else{
+            } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não existe");
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no server");
         }
     }
 
-    private void createPerson(ConsumerDto consumerDto, Consumer consumer) {
-        if (consumerDto.getIndividualConsumer() != null){
-            Individual individual;
-            if(consumer.getIndividual() != null){
-                individual = consumer.getIndividual();
-                new Objects().merge(individual, consumerDto.getIndividualConsumer());
-            }else{
-                individual = new Individual();
-                IndividualDto individualDto = consumerDto.getIndividualConsumer();
+    // Método auxiliar para criar ou atualizar os dados do Consumidor Individual, ou Jurídico com base no formulário (FormConsumerDto)
+    private void createPerson(FormConsumerDto formConsumerDto, Consumer consumer) {
+        if (formConsumerDto.getIndividualConsumer() != null) {
+            var individualBuilder = Individual.builder();
+            IndividualDto individualDto = formConsumerDto.getIndividualConsumer();
+            Individual consumerData = consumer.getIndividual();
 
-                individual.setName(individualDto.getName());
-                individual.setIr(individualDto.getIr());
-                individual.setBirthday(individualDto.getBirthday());
-            }
-            consumer.setIndividual(individual);
+            String name = (consumerData != null && consumerData.getName() != null) ? consumerData.getName() : individualDto.getName();
+            String ir = (consumerData != null && consumerData.getIr() != null) ? consumerData.getIr() : individualDto.getIr();
+            Date birthday = (consumerData != null && consumerData.getBirthday() != null) ? consumerData.getBirthday() : individualDto.getBirthday();
 
-            individualRepository.save(individual);
+            individualBuilder.name(name).ir(ir).birthday(birthday);
 
+            consumer.setIndividual(individualBuilder.build());
+            individualRepository.save(individualBuilder.build());
         }
-        if (consumerDto.getLegalConsumer() != null){
-            Legal legal;
-            if(consumer.getLegal() != null){
-                legal = consumer.getLegal();
-                new Objects().merge(legal, consumerDto.getLegalConsumer());
-            }else{
-                legal = new Legal();
-                LegalDto legalDto = consumerDto.getLegalConsumer();
+        if (formConsumerDto.getLegalConsumer() != null) {
+            var legalBuilder = Legal.builder();
+            LegalDto legalDto = formConsumerDto.getLegalConsumer();
+            Legal consumerData = consumer.getLegal();
 
-                legal.setTrade(legalDto.getTrade());
-                legal.setCnpj(legalDto.getCnpj());
-                legal.setCorporateName(legalDto.getCorporateName());
-            }
-            consumer.setLegal(legal);
+            String corporateName = (consumerData != null && consumerData.getCorporateName() != null) ? consumerData.getCorporateName() : legalDto.getCorporateName();
+            String cnpj = (consumerData != null && consumerData.getCnpj() != null) ? consumerData.getCnpj() : legalDto.getCnpj();
+            String trade = (consumerData != null && consumerData.getTrade() != null) ? consumerData.getTrade() : legalDto.getTrade();
 
-            legalRepository.save(legal);
+            legalBuilder.trade(trade).cnpj(cnpj).corporateName(corporateName);
+
+            consumer.setLegal(legalBuilder.build());
+            legalRepository.save(legalBuilder.build());
+        }
+    }
+
+    public ResponseEntity<List<Consumer>> getAllConsumers() {
+        List<Consumer> consumers = consumerRepository.findAll();
+        if (consumers.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(consumers);
         }
     }
 }
+
