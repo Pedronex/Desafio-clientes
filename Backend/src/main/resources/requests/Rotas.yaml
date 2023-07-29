@@ -1,9 +1,218 @@
-openapi: 3.0.3
+openapi: "3.0.3"
 info:
-  title: $Title$
-  description: $Title$
-  version: 1.0.0
+  title: "JaimeDesafio API"
+  description: "JaimeDesafio API"
+  version: "1.0.0"
 servers:
-  - url: '$https$'
+  - url: "https://JaimeDesafio"
 paths:
-  $END$
+  /client:
+    put:
+      summary: "PUT client"
+      operationId: "updateConsumer"
+      parameters:
+        - name: "id"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+        - name: "Authorization"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormConsumerDto"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+    post:
+      summary: "POST client"
+      operationId: "createConsumer"
+      parameters:
+        - name: "Authorization"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormConsumerDto"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+    delete:
+      summary: "DELETE client"
+      operationId: "deleteConsumer"
+      parameters:
+        - name: "id"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+  /clients:
+    get:
+      summary: "GET clients"
+      operationId: "listConsumers"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Consumer"
+  /login:
+    post:
+      summary: "POST login"
+      operationId: "loginUser"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormLoginDto"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/LoginDto"
+  /user:
+    post:
+      summary: "POST user"
+      operationId: "createUser"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormLoginDto"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/LoginDto"
+components:
+  schemas:
+    IndividualDto:
+      type: "object"
+      properties:
+        ir:
+          type: "string"
+        name:
+          type: "string"
+        birthday:
+          type: "string"
+          format: "date-time"
+    LegalDto:
+      type: "object"
+      properties:
+        cnpj:
+          type: "string"
+        corporateName:
+          type: "string"
+        trade:
+          type: "string"
+    FormConsumerDto:
+      type: "object"
+      properties:
+        phone:
+          type: "string"
+        individual:
+          $ref: "#/components/schemas/IndividualDto"
+        legal:
+          $ref: "#/components/schemas/LegalDto"
+    Individual:
+      type: "object"
+      properties:
+        ir:
+          type: "string"
+        birthday:
+          type: "string"
+          format: "date-time"
+        name:
+          type: "string"
+    Legal:
+      type: "object"
+      properties:
+        cnpj:
+          type: "string"
+        corporateName:
+          type: "string"
+        trade:
+          type: "string"
+    User:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        login:
+          type: "string"
+        pass:
+          type: "string"
+        role:
+          type: "string"
+          enum:
+            - "USER"
+            - "ADMIN"
+    Consumer:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+        phone:
+          type: "string"
+        individual:
+          $ref: "#/components/schemas/Individual"
+        legal:
+          $ref: "#/components/schemas/Legal"
+        user:
+          $ref: "#/components/schemas/User"
+    FormLoginDto:
+      type: "object"
+      properties:
+        login:
+          type: "string"
+        password:
+          type: "string"
+    LoginDto:
+      type: "object"
+      properties:
+        token:
+          type: "string"
+        message:
+          type: "string"

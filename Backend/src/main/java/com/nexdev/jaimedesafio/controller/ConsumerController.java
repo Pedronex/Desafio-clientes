@@ -43,6 +43,6 @@ public class ConsumerController {
 
     @DeleteMapping("/client")
     private ResponseEntity<String> deleteConsumer(@RequestParam String id) {
-        return consumerService.deleteConsuler(Integer.parseInt(id));
+        return consumerService.deleteConsumer(Integer.parseInt(id));
     }
 }

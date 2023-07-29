@@ -30,49 +30,58 @@ public class ConsumerService {
     private final UserRepository userRepository;
     private final TokenProvider provider;
 
-    // Método para criar um consumidor (cliente) com base nos dados fornecidos no formulário (FormConsumerDto)
+    // Método para criar um novo cliente (cliente) a partir dos dados fornecidos no DTO
     public ResponseEntity<String> createConsumer(FormConsumerDto formConsumerDto, String token) {
+        // Extrair o usuário do token
         String result = provider.verifyToken(token.split(" ")[1]);
         try {
+            // Verificar se o usuário existe no banco de dados
             if (userRepository.findByLogin(result).isPresent()) {
                 User user = userRepository.findByLogin(result).get();
 
+                // Criar uma nova entidade Consumer e preencher com os dados do DTO
                 Consumer consumer = Consumer.builder()
                         .phone(formConsumerDto.getPhone())
                         .user(user)
                         .build();
 
-                // Criar ou atualizar os dados do Consumidor Individual ou Jurídico com base no formulário
+                // Criar e salvar pessoas Fisicas ou Legal associadas, se disponíveis
                 createPerson(formConsumerDto, consumer);
+
+                // Salvar o cliente no banco de dados
                 consumerRepository.save(consumer);
 
-                // Retornar uma resposta com código de status CREATED (201) e uma mensagem indicando que o cliente foi cadastrado
                 return ResponseEntity.status(HttpStatus.CREATED).body("Cliente Cadastrado!");
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não localizado");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            // Se ocorrer um erro durante a criação do consumidor, retornar uma resposta com código de status BAD REQUEST (400) e uma mensagem de erro
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Não foi possível determinar o erro");
         }
     }
 
-    // Método para atualizar um consumidor (cliente) existente com base nos dados fornecidos no formulário (FormConsumerDto) e no ID do consumidor
+    // Método para atualizar um cliente existente com os dados fornecidos no DTO
     public ResponseEntity<String> updateConsumer(FormConsumerDto formConsumerDto, int id, String token) {
+        // Extrair o usuário do token
         String result = provider.verifyToken(token.split(" ")[1]);
         try {
-           if (userRepository.findByLogin(result).isPresent()) {
-               if (consumerRepository.findById(id).isPresent()) {
+            // Verificar se o usuário existe no banco de dados
+            if (userRepository.findByLogin(result).isPresent()) {
+                // Verificar se o cliente com o ID fornecido existe no banco de dados
+                if (consumerRepository.findById(id).isPresent()) {
                     User user = userRepository.findByLogin(result).get();
                     Consumer consumer = consumerRepository.findById(id).get();
                     consumer.setId(id);
                     consumer.setUser(user);
 
+                    // Atualizar os dados do cliente com os dados fornecidos no DTO
                     consumer.setPhone(formConsumerDto.getPhone());
 
+                    // Atualizar ou criar pessoas Fisicas, ou Legal associadas, se disponíveis
                     createPerson(formConsumerDto, consumer);
-                   System.out.println(consumer);
+
+                    // Salvar o cliente atualizado no banco de dados
                     consumerRepository.save(consumer);
 
                     return ResponseEntity.status(HttpStatus.OK).body("Consumer Atualizado");
@@ -88,7 +97,7 @@ public class ConsumerService {
         }
     }
 
-    // Método auxiliar para criar ou atualizar os dados do Consumidor Individual, ou Jurídico com base no formulário (FormConsumerDto)
+    // Método privado para criar e associar pessoas Fisicas ou Legal com um cliente
     private void createPerson(FormConsumerDto formConsumerDto, Consumer consumer) {
         if (formConsumerDto.getIndividual() != null) {
             var individualBuilder = Individual.builder();
@@ -123,6 +132,7 @@ public class ConsumerService {
         }
     }
 
+    // Método para retornar todos os clientes cadastrados no sistema
     public ResponseEntity<List<Consumer>> getAllConsumers() {
         List<Consumer> consumers = consumerRepository.findAll();
         if (consumers.isEmpty()) {
@@ -132,13 +142,13 @@ public class ConsumerService {
         }
     }
 
-    public ResponseEntity<String> deleteConsuler(int idClient) {
+    // Método para excluir um cliente pelo ID
+    public ResponseEntity<String> deleteConsumer(int idClient) {
         consumerRepository.deleteById(idClient);
-        if(consumerRepository.findById(idClient).isPresent()){
+        if (consumerRepository.findById(idClient).isPresent()) {
             return ResponseEntity.notFound().build();
-        }else {
+        } else {
             return ResponseEntity.noContent().build();
         }
     }
 }
-

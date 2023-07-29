@@ -20,37 +20,38 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
 
-    private final TokenProvider provider;
+    private final TokenProvider tokenProvider;
     private final UserDetailsService userDetailsService;
 
+    // Método para filtrar as requisições e processar o token JWT
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-            final String authHeader = request.getHeader("authorization");
-            System.out.println(request.getMethod());
-            final String token;
-            final String login;
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            token = authHeader.split(" ")[1];
-            login = provider.verifyToken(token);
-
-            if (login != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(login);
-                if (provider.validateToken(token, userDetails)) {
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
-                    authenticationToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                }
-            }
+        final String authHeader = request.getHeader("authorization");
+        System.out.println(request.getMethod());
+        final String token;
+        final String login;
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
+            return;
         }
+
+        token = authHeader.split(" ")[1];
+        login = tokenProvider.verifyToken(token);
+
+        if (login != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(login);
+            if (tokenProvider.validateToken(token, userDetails)) {
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                authenticationToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
+        }
+        filterChain.doFilter(request, response);
+    }
 }

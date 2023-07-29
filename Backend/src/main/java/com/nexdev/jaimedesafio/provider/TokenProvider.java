@@ -18,6 +18,7 @@ public class TokenProvider {
     @Value(value = "${jwt.secret}")
     private String secret;
 
+    // Gerando o token a partir do nome de login do usuário
     public String generateToken(UserDetails userDetails) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
         System.out.println(secret);
@@ -34,6 +35,7 @@ public class TokenProvider {
                 .sign(algorithm);
     }
 
+    // verifica e retornando o nome do usuário do token
     public String verifyToken(String token) throws JWTVerificationException {
         Algorithm algorithm = Algorithm.HMAC256(secret);
         DecodedJWT decodedJWT;
@@ -42,6 +44,8 @@ public class TokenProvider {
         decodedJWT = verifier.verify(token);
         return decodedJWT.getSubject();
     }
+
+    // verifica se o token é válido
     public boolean validateToken(String token, UserDetails userDetails) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);

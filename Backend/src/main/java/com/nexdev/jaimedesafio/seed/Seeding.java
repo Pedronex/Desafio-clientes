@@ -48,7 +48,7 @@ public class Seeding implements Seed {
     @Override
     public void create() {
         User user = User.builder()
-                .login("pedro.silva")
+                .login("admin")
                 .pass(encoder.encode("master"))
                 .role(Role.USER)
                 .build();
