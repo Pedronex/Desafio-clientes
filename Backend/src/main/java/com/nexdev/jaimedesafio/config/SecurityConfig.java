@@ -3,6 +3,8 @@ package com.nexdev.jaimedesafio.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,26 +29,32 @@ public class SecurityConfig {
     final RequestMatcher PUBLIC_URLS = new OrRequestMatcher(
             new AntPathRequestMatcher("/login"),
             new AntPathRequestMatcher("/user")
+
     );
 
+    final RequestMatcher PRIVATE_URLS = new OrRequestMatcher(
+            new AntPathRequestMatcher("/client", "POST"),
+            new AntPathRequestMatcher("/clients", "GET"),
+            new AntPathRequestMatcher("/client", "PUT"),
+            new AntPathRequestMatcher("/client", "DELETE")
+    );
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests(auth -> auth.requestMatchers(PUBLIC_URLS).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-            .anyRequest().authenticated()).httpBasic(Customizer.withDefaults());
+                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                .requestMatchers(PRIVATE_URLS).authenticated()
+                .anyRequest().permitAll()).httpBasic(Customizer.withDefaults());
         http.authenticationProvider(authenticationProvider);
         http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-   @Bean
+    @Bean
     public WebSecurityCustomizer webSecurityConfigurer() {
         return (web) -> web.ignoring().requestMatchers(new AntPathRequestMatcher("/h2-console/**"));
     }
-
-
 
 }

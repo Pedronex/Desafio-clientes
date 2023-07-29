@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS Usuario (
 );
 
 CREATE TABLE IF NOT EXISTS Cliente (
-    id UUID PRIMARY KEY,
+    id INTEGER PRIMARY KEY,
     dataCadastro DATETIME DEFAULT NOW() NOT NULL,
     dataAtualizacao DATETIME ON UPDATE NOW(),
     telefone VARCHAR

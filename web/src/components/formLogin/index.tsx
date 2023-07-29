@@ -1,48 +1,21 @@
-"use client";
+'use client'
 
-import { useContext } from "react";
-import { FiUsers } from "react-icons/fi";
 import { useForm } from "react-hook-form";
-import { api } from "@/services/api";
-import { setCookie } from "nookies";
-import { useRouter } from "next/navigation";
 
 type FormType = {
-  login: string;
-  password: string;
+    login: string;
+    password: string;
 };
 
-export default function Login() {
-  const { register, handleSubmit } = useForm<FormType>();
-  const navigation = useRouter();
+interface FormLoginProp {
+    handleSignIn: (data: FormType) => Promise<void>;
+}
 
-  async function handleSignIn({ login, password }: FormType) {
-    const { data } = await api.post<{ message?: string; token?: string }>(
-      "/login",
-      {
-        login,
-        password,
-      }
-    );
+export function FormLogin({handleSignIn}: FormLoginProp) {
 
-    if (data.token && !data.message) {
-      setCookie(undefined, "token", data.token);
-      navigation.push("/home");
-    } else {
-      alert("Alerta: " + data.message);
-    }
-  }
+    const { register, handleSubmit } = useForm<FormType>();
 
-  return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm flex items-center flex-col">
-        <FiUsers size={50} />
-        <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight">
-          Faça login com sua conta
-        </h2>
-      </div>
-
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm space-y-6">
+    return (
         <form onSubmit={handleSubmit(handleSignIn)}>
           <div>
             <label
@@ -91,17 +64,5 @@ export default function Login() {
             </button>
           </div>
         </form>
-
-        <p className="mt-10 text-center text-sm text-white-500">
-          Deseja se registrar?
-          <a
-            href="#"
-            className="font-semibold leading-6 bg-[#2773b4] p-1 rounded ml-1 text-white hover:text-blue-500"
-          >
-            Clique aqui
-          </a>
-        </p>
-      </div>
-    </div>
-  );
+    )
 }

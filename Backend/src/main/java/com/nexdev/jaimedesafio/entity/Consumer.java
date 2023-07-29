@@ -20,8 +20,8 @@ import java.util.Date;
 @Table(name = "Cliente")
 public class Consumer {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private int id;
 
     @CreatedDate
     @CreationTimestamp

@@ -59,7 +59,7 @@ public class ConsumerService {
     }
 
     // Método para atualizar um consumidor (cliente) existente com base nos dados fornecidos no formulário (FormConsumerDto) e no ID do consumidor
-    public ResponseEntity<String> updateConsumer(FormConsumerDto formConsumerDto, String id, String token) {
+    public ResponseEntity<String> updateConsumer(FormConsumerDto formConsumerDto, int id, String token) {
         String result = provider.verifyToken(token.split(" ")[1]);
         try {
            if (userRepository.findByLogin(result).isPresent()) {
@@ -72,6 +72,7 @@ public class ConsumerService {
                     consumer.setPhone(formConsumerDto.getPhone());
 
                     createPerson(formConsumerDto, consumer);
+                   System.out.println(consumer);
                     consumerRepository.save(consumer);
 
                     return ResponseEntity.status(HttpStatus.OK).body("Consumer Atualizado");
@@ -89,23 +90,26 @@ public class ConsumerService {
 
     // Método auxiliar para criar ou atualizar os dados do Consumidor Individual, ou Jurídico com base no formulário (FormConsumerDto)
     private void createPerson(FormConsumerDto formConsumerDto, Consumer consumer) {
-        if (formConsumerDto.getIndividualConsumer() != null) {
+        if (formConsumerDto.getIndividual() != null) {
             var individualBuilder = Individual.builder();
-            IndividualDto individualDto = formConsumerDto.getIndividualConsumer();
+            IndividualDto individualDto = formConsumerDto.getIndividual();
             Individual consumerData = consumer.getIndividual();
 
             String name = (consumerData != null && consumerData.getName() != null) ? consumerData.getName() : individualDto.getName();
             String ir = (consumerData != null && consumerData.getIr() != null) ? consumerData.getIr() : individualDto.getIr();
             Date birthday = (consumerData != null && consumerData.getBirthday() != null) ? consumerData.getBirthday() : individualDto.getBirthday();
 
+            name = (individualDto.getName() != null) ? individualDto.getName() : name;
+            ir = (individualDto.getIr() != null) ? individualDto.getIr() : ir;
+            birthday = (individualDto.getBirthday() != null)? individualDto.getBirthday() : birthday;
             individualBuilder.name(name).ir(ir).birthday(birthday);
 
             consumer.setIndividual(individualBuilder.build());
             individualRepository.save(individualBuilder.build());
         }
-        if (formConsumerDto.getLegalConsumer() != null) {
+        if (formConsumerDto.getLegal() != null) {
             var legalBuilder = Legal.builder();
-            LegalDto legalDto = formConsumerDto.getLegalConsumer();
+            LegalDto legalDto = formConsumerDto.getLegal();
             Legal consumerData = consumer.getLegal();
 
             String corporateName = (consumerData != null && consumerData.getCorporateName() != null) ? consumerData.getCorporateName() : legalDto.getCorporateName();
@@ -125,6 +129,15 @@ public class ConsumerService {
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.ok(consumers);
+        }
+    }
+
+    public ResponseEntity<String> deleteConsuler(int idClient) {
+        consumerRepository.deleteById(idClient);
+        if(consumerRepository.findById(idClient).isPresent()){
+            return ResponseEntity.notFound().build();
+        }else {
+            return ResponseEntity.noContent().build();
         }
     }
 }

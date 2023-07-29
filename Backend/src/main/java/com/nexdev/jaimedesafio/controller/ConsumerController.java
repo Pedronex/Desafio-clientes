@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:3000"}, methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.OPTIONS, RequestMethod.DELETE})
 public class ConsumerController {
 
     final
@@ -30,7 +31,8 @@ public class ConsumerController {
             @RequestParam String id,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String token
     ) {
-        return consumerService.updateConsumer(formConsumerDto, id, token);
+        System.out.println(formConsumerDto);
+        return consumerService.updateConsumer(formConsumerDto, Integer.parseInt(id), token);
     }
 
     // Endpoint para listar os consumidores que o usuário criou
@@ -39,4 +41,8 @@ public class ConsumerController {
         return consumerService.getAllConsumers();
     }
 
+    @DeleteMapping("/client")
+    private ResponseEntity<String> deleteConsumer(@RequestParam String id) {
+        return consumerService.deleteConsuler(Integer.parseInt(id));
+    }
 }
