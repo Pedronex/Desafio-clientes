@@ -1,0 +1,6 @@
+#FileLock
+#Fri Jul 28 22:33:23 BRT 2023
+hostName=192.168.1.13
+id=1899f47642708af3f7b7e0a640273eb0176a42bea65
+method=file
+server=192.168.1.13\:53883
